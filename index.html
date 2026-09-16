@@ -16,21 +16,15 @@
     href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
     rel="stylesheet">
 
-  <!-- Supabase JS Client SDK (Reemplaza a SheetJS para conexión directa a la nube) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <style>
     :root {
-      /* Colores Oficiales El Maná Market */
       --logo-navy-950: #081a30;
       --logo-navy-900: #0e2646;
       --logo-navy-850: #11325d;
-      /* Color exacto del logo */
       --logo-navy-800: #163b6b;
       --logo-navy-700: #1d4b85;
 
       --logo-blue-cart: #48a2df;
-      /* Azul celeste del carrito del logo */
       --logo-cyan-400: #38bdf8;
       --logo-cyan-300: #7dd3fc;
       --logo-cyan-200: #bae6fd;
@@ -46,7 +40,6 @@
       --accent-amber: #f59e0b;
       --accent-purple: #7c3aed;
 
-      /* Fondo y atmósfera azul celeste del logo */
       --bg-body-base: #e6f3fc;
       --bg-card: #ffffff;
       --bg-card-hover: #f9fdff;
@@ -114,7 +107,6 @@
       font-family: 'Outfit', sans-serif;
     }
 
-    /* Scrollbar personalizada */
     ::-webkit-scrollbar {
       width: 8px;
       height: 8px;
@@ -133,9 +125,6 @@
       background: var(--logo-navy-850);
     }
 
-    /* ==========================================================================
-       STICKY NAVBAR
-       ========================================================================== */
     .site-header {
       background: var(--bg-glass);
       backdrop-filter: blur(18px);
@@ -159,7 +148,6 @@
       width: 100%;
     }
 
-    /* Logo Branding en Navbar */
     .brand-link {
       display: flex;
       align-items: center;
@@ -194,15 +182,6 @@
       line-height: 1.1;
     }
 
-    .brand-tagline-nav {
-      font-size: 0.8rem;
-      font-weight: 800;
-      color: var(--logo-blue-cart);
-      letter-spacing: 1px;
-      text-transform: uppercase;
-    }
-
-    /* Navbar Search */
     .nav-search-wrapper {
       flex: 1;
       max-width: 580px;
@@ -272,9 +251,6 @@
       color: #fff;
     }
 
-    /* ==========================================================================
-       WIDGET TASA OFICIAL BCV
-       ========================================================================== */
     .bcv-widget-container {
       flex-shrink: 0;
       display: flex;
@@ -319,23 +295,12 @@
     }
 
     @keyframes bcvPulse {
-      0% {
-        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-      }
-
-      70% {
-        box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
-      }
-
-      100% {
-        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
-      }
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
     }
 
-    .bcv-flag-icon {
-      font-size: 0.82rem;
-    }
-
+    .bcv-flag-icon { font-size: 0.82rem; }
     .bcv-title {
       font-size: 0.65rem;
       font-weight: 800;
@@ -378,17 +343,9 @@
       gap: 1rem;
     }
 
-    .header-top-row .bcv-widget-container {
-      display: none;
-    }
+    .header-top-row .bcv-widget-container { display: none; }
+    .bcv-desktop-only { display: flex; }
 
-    .bcv-desktop-only {
-      display: flex;
-    }
-
-    /* ==========================================================================
-       BOTÓN FLOTANTE INFERIOR CENTRADO: MI PEDIDO
-       ========================================================================== */
     .floating-cart-bar {
       position: fixed;
       bottom: 22px;
@@ -427,9 +384,7 @@
       box-shadow: 0 14px 38px rgba(8, 26, 48, 0.55), 0 0 28px rgba(72, 162, 223, 0.7);
     }
 
-    .btn-cart-toggle:active {
-      transform: scale(0.97);
-    }
+    .btn-cart-toggle:active { transform: scale(0.97); }
 
     .cart-badge {
       background: var(--logo-blue-cart);
@@ -446,21 +401,14 @@
       border: 2px solid var(--logo-navy-950);
     }
 
-    /* ==========================================================================
-       MAIN CONTENT CONTAINER
-       ========================================================================== */
     .main-container {
       max-width: 1350px;
       margin: 0 auto;
       padding: 2rem 1.5rem 6.5rem;
-      /* Extra padding bottom para que el botón flotante no tape contenido */
       width: 100%;
       flex: 1;
     }
 
-    /* ==========================================================================
-       CATEGORIES CHIP NAV / FILTER
-       ========================================================================== */
     .categories-section {
       margin-bottom: 2rem;
       width: 100%;
@@ -542,11 +490,6 @@
       color: var(--logo-navy-950);
     }
 
-
-
-    /* ==========================================================================
-       CATEGORY GROUPS & PRODUCT GRID
-       ========================================================================== */
     .category-group-block {
       margin-bottom: 2.8rem;
       width: 100%;
@@ -594,7 +537,6 @@
       box-shadow: 0 2px 6px rgba(72, 162, 223, 0.12);
     }
 
-    /* GRID VIEW CENTRADO */
     .products-grid {
       display: flex;
       flex-wrap: wrap;
@@ -603,7 +545,6 @@
       width: 100%;
     }
 
-    /* PRODUCT CARD */
     .product-card {
       background: var(--bg-card);
       border: 1.5px solid var(--border-soft);
@@ -664,7 +605,6 @@
       word-break: break-word;
     }
 
-    /* Price Box */
     .card-prices-box {
       background: linear-gradient(135deg, #f8fcff 0%, #edf7fd 100%);
       border: 1.5px solid var(--border-soft);
@@ -732,10 +672,7 @@
       text-align: right;
     }
 
-    /* Actions */
-    .card-actions {
-      margin-top: auto;
-    }
+    .card-actions { margin-top: auto; }
 
     .btn-add-item {
       width: 100%;
@@ -801,11 +738,6 @@
       text-align: center;
     }
 
-
-
-    /* ==========================================================================
-       CART SLIDE-OVER DRAWER (CALCULATOR / ORDER VIEWER)
-       ========================================================================== */
     .cart-drawer-overlay {
       position: fixed;
       inset: 0;
@@ -839,9 +771,7 @@
       flex-direction: column;
     }
 
-    .cart-drawer-overlay.open .cart-drawer {
-      transform: translateX(0);
-    }
+    .cart-drawer-overlay.open .cart-drawer { transform: translateX(0); }
 
     .cart-drawer-header {
       background: linear-gradient(135deg, var(--logo-navy-950) 0%, var(--logo-navy-850) 100%);
@@ -943,7 +873,6 @@
       min-width: 55px;
     }
 
-    /* Footer del Carrito / Calculadora */
     .cart-drawer-footer {
       background: var(--logo-cyan-50);
       border-top: 2px solid var(--border-brand);
@@ -1039,15 +968,9 @@
       color: #b91c1c;
     }
 
-
-
-    /* ==========================================================================
-       TOAST NOTIFICATION
-       ========================================================================== */
     .toast-container {
       position: fixed;
       bottom: 85px;
-      /* Por encima del botón flotante */
       left: 50%;
       transform: translateX(-50%);
       z-index: 200;
@@ -1078,20 +1001,10 @@
     }
 
     @keyframes slide-in-toast {
-      from {
-        transform: translateY(20px);
-        opacity: 0;
-      }
-
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
     }
 
-    /* ==========================================================================
-       LOADING & ERROR STATES
-       ========================================================================== */
     .loading-container {
       text-align: center;
       padding: 4rem 1.5rem;
@@ -1112,11 +1025,7 @@
       margin: 0 auto 1.2rem;
     }
 
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
     .no-results-box {
       text-align: center;
@@ -1134,9 +1043,6 @@
       margin-bottom: 0.5rem;
     }
 
-    /* ==========================================================================
-       FOOTER
-       ========================================================================== */
     .site-footer {
       background: linear-gradient(180deg, var(--logo-navy-900) 0%, var(--logo-navy-950) 100%);
       color: #94a3b8;
@@ -1180,18 +1086,8 @@
       margin: 0;
     }
 
-    .footer-brand-logo span {
-      color: var(--logo-blue-cart);
-    }
-
-    .footer-copyright {
-      font-size: 0.85rem;
-      color: #94a3b8;
-    }
-
-    /* ==========================================================================
-       RESPONSIVE DESIGN (ANDROID & MÓVILES PERFECTOS SIN OVERFLOW)
-       ========================================================================== */
+    .footer-brand-logo span { color: var(--logo-blue-cart); }
+    .footer-copyright { font-size: 0.85rem; color: #94a3b8; }
 
     @media (max-width: 768px) {
       .header-container {
@@ -1200,7 +1096,6 @@
         align-items: stretch;
         gap: 0.7rem;
       }
-
       .header-top-row {
         display: flex;
         align-items: center;
@@ -1208,197 +1103,67 @@
         gap: 0.6rem;
         width: 100%;
       }
-
-      .header-top-row .bcv-widget-container {
-        display: flex;
-      }
-
-      .bcv-desktop-only {
-        display: none;
-      }
-
-      .brand-link {
-        justify-content: flex-start;
-      }
-
-      .brand-logo-img {
-        height: 50px;
-      }
-
-      .brand-title-nav {
-        font-size: 1.35rem;
-      }
-
-      .bcv-pill {
-        padding: 0.35rem 0.65rem;
-        min-width: auto;
-      }
-
-      .bcv-title {
-        font-size: 0.6rem;
-      }
-
-      .bcv-rate-amount {
-        font-size: 1.05rem;
-      }
-
-      .bcv-date-caption {
-        display: none;
-      }
-
-      .nav-search-wrapper {
-        max-width: 100%;
-        width: 100%;
-      }
-
-      .nav-search-input {
-        padding: 0.7rem 2.5rem 0.7rem 2.6rem;
-        font-size: 0.9rem;
-      }
-
-      .main-container {
-        padding: 1.2rem 0.85rem 6.5rem;
-      }
-
-      .categories-section {
-        margin-bottom: 1.4rem;
-      }
-
-      .products-grid {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 0.75rem;
-      }
-
+      .header-top-row .bcv-widget-container { display: flex; }
+      .bcv-desktop-only { display: none; }
+      .brand-link { justify-content: flex-start; }
+      .brand-logo-img { height: 50px; }
+      .brand-title-nav { font-size: 1.35rem; }
+      .bcv-pill { padding: 0.35rem 0.65rem; min-width: auto; }
+      .bcv-title { font-size: 0.6rem; }
+      .bcv-rate-amount { font-size: 1.05rem; }
+      .bcv-date-caption { display: none; }
+      .nav-search-wrapper { max-width: 100%; width: 100%; }
+      .nav-search-input { padding: 0.7rem 2.5rem 0.7rem 2.6rem; font-size: 0.9rem; }
+      .main-container { padding: 1.2rem 0.85rem 6.5rem; }
+      .categories-section { margin-bottom: 1.4rem; }
+      .products-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem; }
       .product-card {
         width: calc(50% - 0.375rem);
         flex: 0 1 calc(50% - 0.375rem);
         max-width: calc(50% - 0.375rem);
         padding: 0.85rem 0.7rem;
       }
-
-      .product-card-title {
-        font-size: 0.88rem;
-        min-height: 2.3rem;
-        margin-bottom: 0.55rem;
-      }
-
-      .price-usd-value {
-        font-size: 1.18rem;
-      }
-
-      .price-ves-value {
-        font-size: 1.02rem;
-      }
-
-      .card-prices-box {
-        padding: 0.55rem 0.65rem;
-        margin-bottom: 0.65rem;
-      }
-
-      .btn-add-item {
-        font-size: 0.82rem;
-        padding: 0.52rem 0.5rem;
-      }
-
-      .qty-counter-control {
-        padding: 2px 5px;
-      }
-
-      .qty-btn {
-        width: 26px;
-        height: 26px;
-        font-size: 1rem;
-      }
-
-      .qty-value {
-        font-size: 0.92rem;
-      }
-
-      .cart-drawer {
-        max-width: 100%;
-      }
-
-      .floating-cart-bar {
-        bottom: 16px;
-      }
-
-      .btn-cart-toggle {
-        padding: 0.8rem 1.5rem;
-        font-size: 0.98rem;
-      }
+      .product-card-title { font-size: 0.88rem; min-height: 2.3rem; margin-bottom: 0.55rem; }
+      .price-usd-value { font-size: 1.18rem; }
+      .price-ves-value { font-size: 1.02rem; }
+      .card-prices-box { padding: 0.55rem 0.65rem; margin-bottom: 0.65rem; }
+      .btn-add-item { font-size: 0.82rem; padding: 0.52rem 0.5rem; }
+      .qty-counter-control { padding: 2px 5px; }
+      .qty-btn { width: 26px; height: 26px; font-size: 1rem; }
+      .qty-value { font-size: 0.92rem; }
+      .cart-drawer { max-width: 100%; }
+      .floating-cart-bar { bottom: 16px; }
+      .btn-cart-toggle { padding: 0.8rem 1.5rem; font-size: 0.98rem; }
     }
 
     @media (max-width: 480px) {
-      .brand-title-nav {
-        font-size: 1.12rem;
-      }
-
-      .brand-logo-img {
-        height: 42px;
-      }
-
-      .bcv-pill {
-        padding: 0.3rem 0.5rem;
-      }
-
-      .bcv-title {
-        font-size: 0.56rem;
-      }
-
-      .bcv-rate-amount {
-        font-size: 0.95rem;
-      }
-
-      .categories-title {
-        font-size: 1.15rem;
-      }
-
-      .category-chip {
-        padding: 0.5rem 0.95rem;
-        font-size: 0.84rem;
-      }
-
-      .products-grid {
-        gap: 0.55rem;
-      }
-
+      .brand-title-nav { font-size: 1.12rem; }
+      .brand-logo-img { height: 42px; }
+      .bcv-pill { padding: 0.3rem 0.5rem; }
+      .bcv-title { font-size: 0.56rem; }
+      .bcv-rate-amount { font-size: 0.95rem; }
+      .categories-title { font-size: 1.15rem; }
+      .category-chip { padding: 0.5rem 0.95rem; font-size: 0.84rem; }
+      .products-grid { gap: 0.55rem; }
       .product-card {
         width: calc(50% - 0.275rem);
         flex: 0 1 calc(50% - 0.275rem);
         max-width: calc(50% - 0.275rem);
         padding: 0.75rem 0.55rem;
       }
-
-      .card-category-tag {
-        font-size: 0.65rem;
-        padding: 0.12rem 0.45rem;
-      }
-
-      .price-usd-label,
-      .price-ves-label {
-        font-size: 0.62rem;
-      }
-
-      .price-usd-value {
-        font-size: 1.05rem;
-      }
-
-      .price-ves-value {
-        font-size: 0.92rem;
-      }
+      .card-category-tag { font-size: 0.65rem; padding: 0.12rem 0.45rem; }
+      .price-usd-label, .price-ves-label { font-size: 0.62rem; }
+      .price-usd-value { font-size: 1.05rem; }
+      .price-ves-value { font-size: 0.92rem; }
     }
   </style>
 </head>
 
 <body>
 
-  <!-- CABECERA PRINCIPAL STICKY -->
   <header class="site-header">
     <div class="header-container">
       <div class="header-top-row">
-        <!-- Logo y Nombre de Marca -->
         <a href="#" class="brand-link" title="El Maná Market — Inicio">
           <img src="imagen/logo.png" alt="Logo El Maná Market" class="brand-logo-img">
           <div class="brand-text-container">
@@ -1406,7 +1171,6 @@
           </div>
         </a>
 
-        <!-- Widget Tasa Oficial BCV (móvil) -->
         <div class="bcv-widget-container" id="bcvWidgetMobile" title="Tasa oficial del Banco Central de Venezuela">
           <div class="bcv-pill">
             <div class="bcv-badge-header">
@@ -1422,7 +1186,6 @@
         </div>
       </div>
 
-      <!-- Barra de Búsqueda -->
       <div class="nav-search-wrapper">
         <div class="search-input-group">
           <span class="search-icon">🔍</span>
@@ -1432,7 +1195,6 @@
         </div>
       </div>
 
-      <!-- Widget Tasa Oficial BCV (escritorio) -->
       <div class="bcv-widget-container bcv-desktop-only" id="bcvWidgetDesktop"
         title="Tasa oficial del Banco Central de Venezuela">
         <div class="bcv-pill">
@@ -1450,10 +1212,7 @@
     </div>
   </header>
 
-  <!-- CONTENIDO PRINCIPAL: CATÁLOGO Y PRODUCTOS -->
   <main class="main-container">
-
-    <!-- Sección de Filtro por Categorías -->
     <section class="categories-section">
       <div class="categories-header">
         <div class="categories-title">
@@ -1461,7 +1220,6 @@
         </div>
       </div>
       <div class="categories-scroll-container" id="categoryChipsContainer">
-        <!-- Generado dinámicamente con JS -->
         <button class="category-chip active" data-category="ALL">
           <span>Todos</span>
           <span class="chip-count" id="totalCountChip">0</span>
@@ -1469,9 +1227,6 @@
       </div>
     </section>
 
-
-
-    <!-- Contenedor Dinámico de Productos -->
     <div id="productsContainer">
       <div class="loading-container">
         <div class="loading-spinner"></div>
@@ -1479,10 +1234,8 @@
         <p style="color:var(--text-muted); font-size:0.9rem;">Organizando inventario y categorías.</p>
       </div>
     </div>
-
   </main>
 
-  <!-- BOTÓN FLOTANTE INFERIOR CENTRADO "MI PEDIDO" (ESCRITORIO Y MÓVIL) -->
   <div class="floating-cart-bar">
     <button id="btnOpenCart" class="btn-cart-toggle" title="Ver mi pedido y total">
       <span>🛒 Mi Pedido</span>
@@ -1490,7 +1243,6 @@
     </button>
   </div>
 
-  <!-- DRAWER LATERAL: MI PEDIDO / CALCULADORA -->
   <div class="cart-drawer-overlay" id="cartOverlay">
     <div class="cart-drawer">
       <div class="cart-drawer-header">
@@ -1503,7 +1255,7 @@
         <div class="cart-empty-state">
           <div class="cart-empty-icon">🛍️</div>
           <h4 style="color:var(--logo-navy-850); margin-bottom:0.5rem;">Tu pedido está vacío</h4>
-          <p>Explora el catálogo y presiona "+ Añadir al Pedido" en los productos que deseas calcular.</p>
+          <p>Explora el catálogo y presiona "+ Añadir" en los productos que deseas calcular.</p>
         </div>
       </div>
 
@@ -1536,10 +1288,8 @@
     </div>
   </div>
 
-  <!-- TOAST NOTIFICATIONS -->
   <div class="toast-container" id="toastContainer"></div>
 
-  <!-- PIE DE PÁGINA -->
   <footer class="site-footer">
     <div class="footer-simple-container">
       <div class="footer-brand-logo">
@@ -1552,16 +1302,16 @@
     </div>
   </footer>
 
-  <!-- ==========================================================================
-       LÓGICA JAVASCRIPT & APLICACIÓN (MODIFICADA PARA SUPABASE)
-       ========================================================================== -->
   <script>
-    // Conexión a Supabase
-    const SUPABASE_URL = 'https://lzqdhdvkwiinocmrrwjn.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_BoRLHezGfOx1q-JBGty8WQ_NzNm01Gv';
-    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Configura la IP pública o dominio de tu VPS
+    const VPS_HOST = 'http://166.1.88.23'; // Reemplaza TU_IP_VPS por la IP de tu VPS
+    const TENANT_ID = 'demo_cliente';    // El negocio actual
 
-    // Estado global de la aplicación
+    // Detecta automáticamente si el HTML corre en el mismo servidor o externamente
+    const API_ENDPOINT = (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+      ? `${VPS_HOST}/api/el_mana_market`
+      : '/api/el_mana_market';
+
     const state = {
       productos: [],
       categorias: [],
@@ -1572,9 +1322,6 @@
       tasaFecha: ''
     };
 
-    // =========================================================================
-    // UTILIDADES DE FORMATEO (USD & BOLÍVARES VENEZUELA)
-    // =========================================================================
     function formatearBs(monto) {
       if (isNaN(monto) || monto === null || monto === undefined) return 'Bs. 0,00';
       const num = Number(monto);
@@ -1588,11 +1335,7 @@
       return '$' + Number(monto).toFixed(2);
     }
 
-    // =========================================================================
-    // SERVICIO: CONSULTA DE TASA OFICIAL BCV (ve.dolarapi.com)
-    // =========================================================================
     async function obtenerTasaBCV() {
-      // 1. Leer caché si existe para mostrar de inmediato
       const cached = localStorage.getItem('mana_bcv_rate');
       if (cached) {
         try {
@@ -1607,7 +1350,6 @@
         }
       }
 
-      // 2. Consulta en vivo a la API
       try {
         const response = await fetch('https://ve.dolarapi.com/v1/dolares/oficial');
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -1632,7 +1374,7 @@
       } catch (err) {
         console.warn('Aviso: No se pudo consultar la API BCV en vivo:', err);
         if (!state.tasaBcv) {
-          state.tasaBcv = 798.33; // Tasa referencial de contingencia
+          state.tasaBcv = 798.33;
           state.tasaFecha = 'Referencial';
         }
         actualizarUIBCV();
@@ -1651,24 +1393,24 @@
       }
     }
 
-    function getCategoryIcon(categoria) {
-      return '';
-    }
+    async function cargarProductosDesdeAPI() {
+      const response = await fetch(API_ENDPOINT, {
+        headers: {
+          'x-tenant-id': TENANT_ID
+        }
+      });
 
-    // =========================================================================
-    // SERVICIOS: CARGA DESDE SUPABASE (Tabla: el_mana_market)
-    // =========================================================================
-    async function cargarProductosDesdeSupabase() {
-      const { data, error } = await _supabase
-        .from('el_mana_market')
-        .select('*');
-
-      if (error) {
-        throw new Error('Error al conectar con Supabase: ' + error.message);
+      if (!response.ok) {
+        throw new Error(`Error en el servidor: HTTP ${response.status}`);
       }
 
+      const data = await response.json();
+
       if (!data || data.length === 0) {
-        throw new Error('La base de datos está vacía.');
+        state.productos = [];
+        state.categorias = [];
+        renderizarCategoriasChips();
+        return;
       }
 
       const lista = [];
@@ -1697,15 +1439,11 @@
       renderizarCategoriasChips();
     }
 
-    // =========================================================================
-    // COMPONENTES: FILTRO DE CATEGORÍAS (CHIPS)
-    // =========================================================================
     function renderizarCategoriasChips() {
       const container = document.getElementById('categoryChipsContainer');
       const totalChip = document.getElementById('totalCountChip');
       if (totalChip) totalChip.textContent = state.productos.length;
 
-      // Conteo por categoría
       const conteo = {};
       state.productos.forEach(p => {
         conteo[p.categoria] = (conteo[p.categoria] || 0) + 1;
@@ -1730,7 +1468,6 @@
 
       container.innerHTML = html;
 
-      // Event listeners para chips
       container.querySelectorAll('.category-chip').forEach(btn => {
         btn.addEventListener('click', () => {
           container.querySelectorAll('.category-chip').forEach(b => b.classList.remove('active'));
@@ -1741,9 +1478,6 @@
       });
     }
 
-    // =========================================================================
-    // COMPONENTES: RENDERIZADO DEL CATÁLOGO (GRID / LISTA)
-    // =========================================================================
     function escapeHtml(str) {
       if (!str) return '';
       return String(str).replace(/[&<>"']/g, function (m) {
@@ -1754,12 +1488,10 @@
     function filtrarYOrdenarProductos() {
       let resultado = [...state.productos];
 
-      // 1. Filtrar por categoría
       if (state.categoriaActiva !== 'ALL') {
         resultado = resultado.filter(p => p.categoria.toLowerCase() === state.categoriaActiva.toLowerCase());
       }
 
-      // 2. Filtrar por búsqueda
       const q = state.busqueda.trim().toLowerCase();
       if (q) {
         resultado = resultado.filter(p =>
@@ -1768,9 +1500,7 @@
         );
       }
 
-      // Ordenar por categoría y nombre
       resultado.sort((a, b) => a.categoria.localeCompare(b.categoria) || a.nombre.localeCompare(b.nombre));
-
       return resultado;
     }
 
@@ -1781,15 +1511,14 @@
       if (filtrados.length === 0) {
         container.innerHTML = `
           <div class="no-results-box">
-            <div style="font-size:3.2rem; margin-bottom:0.8rem;">🔍</div>
-            <h3>No encontramos productos que coincidan</h3>
-            <p>Intenta con otra palabra clave o selecciona otra categoría.</p>
+            <div style="font-size:3.2rem; margin-bottom:0.8rem;">📦</div>
+            <h3>${state.productos.length === 0 ? 'No hay productos en inventario' : 'No encontramos productos que coincidan'}</h3>
+            <p>${state.productos.length === 0 ? 'Sincroniza productos desde tu sistema para comenzar.' : 'Intenta con otra palabra clave o selecciona otra categoría.'}</p>
           </div>
         `;
         return;
       }
 
-      // Renderizar siempre en cuadrícula
       if (state.categoriaActiva === 'ALL' && !state.busqueda) {
         renderizarVistaAgrupada(container, filtrados);
       } else {
@@ -1887,7 +1616,6 @@
     }
 
     function vincularEventosBotonesCard() {
-      // Botón Añadir
       document.querySelectorAll('.btn-cart-add').forEach(btn => {
         btn.addEventListener('click', () => {
           const id = btn.getAttribute('data-id');
@@ -1895,7 +1623,6 @@
         });
       });
 
-      // Botón Incrementar
       document.querySelectorAll('.btn-cart-inc').forEach(btn => {
         btn.addEventListener('click', () => {
           const id = btn.getAttribute('data-id');
@@ -1903,7 +1630,6 @@
         });
       });
 
-      // Botón Decrementar
       document.querySelectorAll('.btn-cart-dec').forEach(btn => {
         btn.addEventListener('click', () => {
           const id = btn.getAttribute('data-id');
@@ -1912,9 +1638,6 @@
       });
     }
 
-    // =========================================================================
-    // GESTIÓN DEL PEDIDO Y TOTALES (CALCULADORA DE MERCADO)
-    // =========================================================================
     function guardarCarrito() {
       localStorage.setItem('mana_market_cart', JSON.stringify(state.carrito));
       actualizarBadgeCarrito();
@@ -2044,9 +1767,6 @@
       }
     }
 
-    // =========================================================================
-    // UTILIDADES & NOTIFICACIONES
-    // =========================================================================
     function mostrarToast(mensaje) {
       const container = document.getElementById('toastContainer');
       if (!container) return;
@@ -2063,15 +1783,10 @@
       }, 2300);
     }
 
-    // =========================================================================
-    // INICIALIZACIÓN DE LA APLICACIÓN
-    // =========================================================================
     (async function init() {
-      // Actualizar año en footer
       const yearEl = document.getElementById('footerYear');
       if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-      // Configurar eventos de navegación y UI
       const cartOverlay = document.getElementById('cartOverlay');
       const btnOpenCart = document.getElementById('btnOpenCart');
       const btnCloseCart = document.getElementById('btnCloseCart');
@@ -2114,12 +1829,10 @@
         });
       }
 
-      // Iniciar consulta de tasa BCV en paralelo
       const promesaBCV = obtenerTasaBCV();
 
-      // Cargar productos desde Supabase
       try {
-        await cargarProductosDesdeSupabase();
+        await cargarProductosDesdeAPI();
         await promesaBCV;
         actualizarBadgeCarrito();
         actualizarDrawerCarrito();
