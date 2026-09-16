@@ -16,8 +16,8 @@
     href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
     rel="stylesheet">
 
-  <!-- SheetJS para lectura rápida de CSV -->
-  <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+  <!-- Supabase JS Client SDK (Reemplaza a SheetJS para conexión directa a la nube) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     :root {
@@ -1553,10 +1553,13 @@
   </footer>
 
   <!-- ==========================================================================
-       LÓGICA JAVASCRIPT & APLICACIÓN
+       LÓGICA JAVASCRIPT & APLICACIÓN (MODIFICADA PARA SUPABASE)
        ========================================================================== -->
   <script>
-    const CSV_FILE = 'productos.csv';
+    // Conexión a Supabase
+    const SUPABASE_URL = 'https://lzqdhdvkwiinocmrrwjn.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_BoRLHezGfOx1q-JBGty8WQ_NzNm01Gv';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // Estado global de la aplicación
     const state = {
@@ -1653,62 +1656,41 @@
     }
 
     // =========================================================================
-    // SERVICIOS: CARGA Y PARSEO DE CSV
+    // SERVICIOS: CARGA DESDE SUPABASE (Tabla: el_mana_market)
     // =========================================================================
-    function detectColumns(headers) {
-      let nombreCol = null, precioUsdCol = null, categoriaCol = null, idCol = null;
-      for (let i = 0; i < headers.length; i++) {
-        const h = String(headers[i]).toLowerCase().trim();
-        if (h === 'id' || h.includes('código') || h.includes('codigo')) idCol = i;
-        if (h.includes('nombre') || h === 'producto' || h.includes('descrip')) nombreCol = i;
-        if (h.includes('precio venta') || h.includes('precio $') || h.includes('usd') || (h.includes('precio') && h.includes('dolar'))) {
-          precioUsdCol = i;
-        }
-        if (h.includes('categor') || h.includes('tipo') || h.includes('rubro')) categoriaCol = i;
+    async function cargarProductosDesdeSupabase() {
+      const { data, error } = await _supabase
+        .from('el_mana_market')
+        .select('*');
+
+      if (error) {
+        throw new Error('Error al conectar con Supabase: ' + error.message);
       }
-      return { idCol, nombreCol, precioUsdCol, categoriaCol };
-    }
 
-    async function cargarProductosDesdeCSV() {
-      const response = await fetch(CSV_FILE);
-      if (!response.ok) throw new Error(`No se encontró el archivo ${CSV_FILE}`);
-      const csvText = await response.text();
-      const workbook = XLSX.read(csvText, { type: 'string' });
-      const primeraHoja = workbook.Sheets[workbook.SheetNames[0]];
-      const datos = XLSX.utils.sheet_to_json(primeraHoja, { header: 1, defval: "" });
-
-      if (!datos || datos.length < 2) throw new Error('El archivo CSV está vacío');
-      const headers = datos[0];
-      const { idCol, nombreCol, precioUsdCol, categoriaCol } = detectColumns(headers);
-
-      if (nombreCol === null || precioUsdCol === null) {
-        throw new Error('Columnas requeridas (Nombre o Precio) no encontradas en el archivo CSV.');
+      if (!data || data.length === 0) {
+        throw new Error('La base de datos está vacía.');
       }
 
       const lista = [];
       const categoriasSet = new Set();
 
-      for (let i = 1; i < datos.length; i++) {
-        const fila = datos[i];
-        if (!fila[nombreCol] || String(fila[nombreCol]).trim() === '') continue;
+      data.forEach((fila, i) => {
+        const nombre = fila.nombre || '';
+        if (!nombre.trim()) return;
 
-        const rawPrecio = fila[precioUsdCol] !== undefined ? fila[precioUsdCol] : 0;
-        const precioUsd = parseFloat(String(rawPrecio).replace(',', '.')) || 0;
-        let categoria = 'General';
-        if (categoriaCol !== null && fila[categoriaCol] && String(fila[categoriaCol]).trim() !== '') {
-          categoria = String(fila[categoriaCol]).trim();
-        }
+        const precioUsd = Number(fila.precio_venta) || 0;
+        let categoria = (fila.categoria && String(fila.categoria).trim() !== '') ? String(fila.categoria).trim() : 'General';
+        
         categoriasSet.add(categoria);
-
-        const prodId = (idCol !== null && fila[idCol]) ? String(fila[idCol]).trim() : `prod_${i}`;
+        const prodId = fila.id ? String(fila.id) : `prod_${i}`;
 
         lista.push({
           id: prodId,
-          nombre: String(fila[nombreCol]).trim(),
+          nombre: nombre.trim(),
           precioUsd: precioUsd,
           categoria: categoria
         });
-      }
+      });
 
       state.productos = lista;
       state.categorias = Array.from(categoriasSet).sort((a, b) => a.localeCompare(b));
@@ -2135,9 +2117,9 @@
       // Iniciar consulta de tasa BCV en paralelo
       const promesaBCV = obtenerTasaBCV();
 
-      // Cargar productos del catálogo
+      // Cargar productos desde Supabase
       try {
-        await cargarProductosDesdeCSV();
+        await cargarProductosDesdeSupabase();
         await promesaBCV;
         actualizarBadgeCarrito();
         actualizarDrawerCarrito();
