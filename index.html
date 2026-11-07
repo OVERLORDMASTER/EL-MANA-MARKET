@@ -381,17 +381,6 @@
       flex-wrap: wrap;
     }
 
-    .hero-card::after {
-      content: '🛒';
-      position: absolute;
-      right: -14px;
-      bottom: -34px;
-      font-size: 9rem;
-      opacity: 0.07;
-      transform: rotate(-12deg);
-      pointer-events: none;
-    }
-
     .hero-eyebrow {
       display: inline-flex;
       align-items: center;
@@ -427,101 +416,106 @@
       max-width: 480px;
     }
 
-    /* Pasos "cómo funciona" (lado derecho del hero, solo escritorio) */
-    .hero-steps {
+    /* Carrito 3D (lado derecho del hero) */
+    .hero-cart {
+      --hc-w: 290px;
       position: relative;
       z-index: 1;
-      list-style: none;
-      display: grid;
-      grid-template-columns: repeat(3, 150px);
-      gap: 0.75rem;
+      flex-shrink: 0;
+      width: var(--hc-w);
+      aspect-ratio: 600 / 526;
+      margin: -0.6rem 0.4rem -0.9rem 0;
+      perspective: 900px;
+      perspective-origin: 50% 40%;
+      touch-action: pan-y;
+      user-select: none;
+      -webkit-user-select: none;
     }
 
-    .hero-step {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      gap: 0.15rem;
-      padding: 1rem 1rem 1.05rem;
-      background: rgba(255, 255, 255, 0.07);
-      border: 1px solid rgba(255, 255, 255, 0.13);
-      border-radius: var(--radius-md);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      transition: transform 0.25s var(--ease), background 0.25s;
-    }
-
-    .hero-step:hover {
-      transform: translateY(-3px);
-      background: rgba(255, 255, 255, 0.11);
-    }
-
-    .hero-step:not(:last-child)::after {
-      content: '›';
+    /* Resplandor del piso: se encoge cuando el carrito sube */
+    .hc-floor {
       position: absolute;
-      right: -0.62rem;
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 2;
-      width: 22px;
-      height: 22px;
-      display: grid;
-      place-items: center;
+      left: 16%;
+      right: 6%;
+      bottom: -3%;
+      height: 13%;
       border-radius: 50%;
-      background: var(--logo-blue-cart);
-      color: var(--logo-navy-950);
-      font-size: 1rem;
-      font-weight: 900;
-      line-height: 1;
+      background: radial-gradient(closest-side, rgba(125, 211, 252, 0.5), rgba(72, 162, 223, 0.18) 60%, rgba(72, 162, 223, 0));
+      animation: hcFloor 4.8s ease-in-out infinite;
+      pointer-events: none;
     }
 
-    .hero-step-icon {
-      width: 40px;
-      height: 40px;
-      margin-bottom: 0.45rem;
-      display: grid;
-      place-items: center;
-      border-radius: 12px;
-      background: rgba(72, 162, 223, 0.22);
-      font-size: 1.15rem;
+    .hc-float {
+      position: absolute;
+      inset: 0;
+      transform-style: preserve-3d;
+      animation: hcFloat 4.8s ease-in-out infinite;
     }
 
-    .hero-step-num {
-      font-size: 0.62rem;
-      font-weight: 800;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--logo-cyan-300);
+    .hc-rig {
+      position: absolute;
+      inset: 0;
+      transform-style: preserve-3d;
+      transform: rotateX(4deg) rotateY(-14deg);
+      will-change: transform;
     }
 
-    .hero-step-title {
-      font-family: 'Outfit', sans-serif;
-      font-size: 1.08rem;
-      font-weight: 800;
-      line-height: 1.15;
+    .hc-rig img,
+    .hc-speed-wrap {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      -webkit-user-drag: none;
     }
 
-    .hero-step-text {
-      font-size: 0.74rem;
-      font-weight: 500;
-      line-height: 1.35;
-      color: rgba(224, 242, 254, 0.72);
+    .hc-speed-wrap {
+      transform: translateZ(-22px);
+      transition: opacity 0.2s;
     }
 
-    @media (min-width: 901px) {
+    .hc-speed-wrap img {
+      animation: hcWhoosh 1.3s ease-in-out infinite alternate;
+    }
+
+    /* La cara frontal brilla un poco sobre el fondo oscuro */
+    .hc-front {
+      filter: drop-shadow(0 0 10px rgba(72, 162, 223, 0.28));
+    }
+
+    @keyframes hcFloat {
+      0%, 100% { transform: translateY(5px); }
+      50% { transform: translateY(-13px); }
+    }
+
+    @keyframes hcFloor {
+      0%, 100% { transform: scale(1); opacity: 0.95; }
+      50% { transform: scale(0.78); opacity: 0.5; }
+    }
+
+    @keyframes hcWhoosh {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(-5%); opacity: 0.45; }
+    }
+
+    @media (min-width: 641px) {
       .hero-card { flex-wrap: nowrap; }
       .hero-card > div:first-child { flex: 1 1 auto; min-width: 0; }
-      .hero-steps { flex-shrink: 0; }
     }
 
     @media (max-width: 1100px) {
-      .hero-steps { grid-template-columns: repeat(3, 112px); }
-      .hero-step { padding: 0.85rem 0.8rem; }
-      .hero-step-text { display: none; }
+      .hero-cart { --hc-w: 230px; }
     }
 
     @media (max-width: 900px) {
-      .hero-steps { display: none; }
+      .hero-cart { --hc-w: 190px; margin-right: 0; }
+    }
+
+    @media (max-width: 640px) {
+      .hero-card { flex-wrap: nowrap; gap: 0.6rem; }
+      .hero-card > div:first-child { flex: 1 1 auto; min-width: 0; }
+      .hero-cart { --hc-w: 118px; margin: -0.3rem -0.4rem -0.5rem 0; }
     }
 
     /* ==========================================================================
@@ -1535,6 +1529,8 @@
     @media (max-width: 400px) {
       .brand-tagline-nav { display: none; }
       .hero-title { font-size: 1.4rem; }
+      .hero-eyebrow { white-space: nowrap; font-size: 0.64rem; letter-spacing: 0.08em; }
+      .hero-cart { --hc-w: 96px; }
       .price-ves-label { display: none; }
       .price-stack.ves { justify-content: flex-end; }
     }
@@ -1604,26 +1600,21 @@
         <h1 class="hero-title">Precios del día, <span>en dólares y bolívares</span></h1>
         <p class="hero-subtitle">Arma tu pedido y calcula el total al instante con la tasa oficial del BCV.</p>
       </div>
-      <ol class="hero-steps" aria-label="Cómo funciona">
-        <li class="hero-step">
-          <span class="hero-step-icon">🔍</span>
-          <span class="hero-step-num">Paso 1</span>
-          <span class="hero-step-title">Busca</span>
-          <span class="hero-step-text">Encuentra tus productos por nombre o categoría</span>
-        </li>
-        <li class="hero-step">
-          <span class="hero-step-icon">➕</span>
-          <span class="hero-step-num">Paso 2</span>
-          <span class="hero-step-title">Añade</span>
-          <span class="hero-step-text">Elige la cantidad de cada producto</span>
-        </li>
-        <li class="hero-step">
-          <span class="hero-step-icon">🛒</span>
-          <span class="hero-step-num">Paso 3</span>
-          <span class="hero-step-title">Mira tu total</span>
-          <span class="hero-step-text">En dólares y bolívares al instante</span>
-        </li>
-      </ol>
+      <!-- Carrito 3D del logo: capas con profundidad que siguen al ratón -->
+      <div class="hero-cart" id="heroCart" aria-hidden="true">
+        <div class="hc-floor"></div>
+        <div class="hc-float">
+          <div class="hc-rig">
+            <div class="hc-speed-wrap"><img src="imagen/carrito3d/velocidad.webp" alt="" draggable="false"></div>
+            <img class="hc-front" src="imagen/carrito3d/estructura.webp" alt="" draggable="false"
+              data-side="imagen/carrito3d/estructura-lado.webp" data-z="0" data-depth="13">
+            <img class="hc-front" src="imagen/carrito3d/ruedas.webp" alt="" draggable="false"
+              data-side="imagen/carrito3d/ruedas-lado.webp" data-z="2" data-depth="16">
+            <img class="hc-front" src="imagen/carrito3d/cesta.webp" alt="" draggable="false"
+              data-side="imagen/carrito3d/cesta-lado.webp" data-z="34" data-depth="12">
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- Filtro por Categorías -->
@@ -2336,6 +2327,113 @@
           </div>
         `;
       }
+    })();
+
+    // =========================================================================
+    // CARRITO 3D DEL HERO
+    // Capas del logo a distintas profundidades + caras laterales apiladas
+    // (grosor). Se inclina hacia el ratón / dedo, sin dar la vuelta completa.
+    // =========================================================================
+    (function carrito3D() {
+      const stage = document.getElementById('heroCart');
+      if (!stage) return;
+      const rig = stage.querySelector('.hc-rig');
+      const speed = stage.querySelector('.hc-speed-wrap');
+      const hero = stage.closest('.hero-card') || stage;
+
+      // Grosor: copias oscuras detrás de cada capa frontal
+      const PASO_GROSOR = 1.5;
+      rig.querySelectorAll('img[data-side]').forEach(front => {
+        const z = Number(front.dataset.z) || 0;
+        const depth = Number(front.dataset.depth) || 10;
+        front.style.transform = `translateZ(${z}px)`;
+        const frag = document.createDocumentFragment();
+        for (let d = depth; d > 0; d -= PASO_GROSOR) {
+          const side = document.createElement('img');
+          side.src = front.dataset.side;
+          side.alt = '';
+          side.draggable = false;
+          side.style.transform = `translateZ(${z - d}px)`;
+          frag.appendChild(side);
+        }
+        front.before(frag);
+      });
+
+      // Con "reducir movimiento" se queda quieto en una pose 3D fija
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+      const LIMITE = { ry: 24, rx: 15, tx: 14, ty: 12 }; // grados y px máximos
+      const actual = { rx: 4, ry: -14, tx: 0, ty: 0 };
+      let puntero = null;   // { nx, ny } entre -1 y 1, o null si no hay ratón encima
+      let visible = true;
+      let rafId = null;
+
+      const limitar = v => Math.max(-1, Math.min(1, v));
+
+      function leerPuntero(e) {
+        const r = stage.getBoundingClientRect();
+        puntero = {
+          nx: limitar((e.clientX - (r.left + r.width / 2)) / (r.width * 1.3)),
+          ny: limitar((e.clientY - (r.top + r.height / 2)) / (r.height * 1.3))
+        };
+      }
+
+      hero.addEventListener('pointermove', leerPuntero, { passive: true });
+      hero.addEventListener('pointerdown', leerPuntero, { passive: true });
+      ['pointerleave', 'pointercancel'].forEach(ev => hero.addEventListener(ev, () => { puntero = null; }));
+      hero.addEventListener('pointerup', e => { if (e.pointerType !== 'mouse') puntero = null; });
+
+      function cuadro(t) {
+        rafId = null;
+        let objetivo;
+        if (puntero) {
+          objetivo = {
+            ry: puntero.nx * LIMITE.ry,
+            rx: -puntero.ny * LIMITE.rx,
+            tx: puntero.nx * LIMITE.tx,
+            ty: puntero.ny * LIMITE.ty
+          };
+        } else {
+          // Sin ratón: balanceo suave de lado a lado y un leve cabeceo
+          const s = t / 1000;
+          objetivo = {
+            ry: Math.sin(s * 0.75) * 17,
+            rx: 3 + Math.sin(s * 1.15) * 5,
+            tx: Math.sin(s * 0.75) * 7,
+            ty: 0
+          };
+        }
+
+        const k = puntero ? 0.09 : 0.05;
+        const ryAntes = actual.ry;
+        for (const clave in actual) actual[clave] += (objetivo[clave] - actual[clave]) * k;
+
+        rig.style.transform =
+          `translate3d(${actual.tx.toFixed(2)}px, ${actual.ty.toFixed(2)}px, 0) ` +
+          `rotateX(${actual.rx.toFixed(2)}deg) rotateY(${actual.ry.toFixed(2)}deg)`;
+
+        // Las líneas de velocidad se encienden cuando el carrito se mueve rápido
+        if (speed) {
+          const vel = Math.abs(actual.ry - ryAntes);
+          speed.style.opacity = (0.55 + Math.min(0.45, vel * 0.5)).toFixed(2);
+        }
+
+        if (visible && !document.hidden) rafId = requestAnimationFrame(cuadro);
+      }
+
+      function arrancar() {
+        if (rafId === null && visible && !document.hidden) rafId = requestAnimationFrame(cuadro);
+      }
+
+      // Solo se anima cuando el hero está en pantalla
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(entradas => {
+          visible = entradas[0].isIntersecting;
+          arrancar();
+        }).observe(stage);
+      }
+      document.addEventListener('visibilitychange', arrancar);
+      arrancar();
     })();
   </script>
 </body>
