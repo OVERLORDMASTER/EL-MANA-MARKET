@@ -9,6 +9,10 @@
     content="Módulo interno de consulta rápida de costos de compra, precios de venta y márgenes de ganancia en El Maná Market." />
   <meta name="robots" content="noindex, nofollow" />
   <meta name="theme-color" content="#081a30" />
+  <!-- Seguridad: solo se permite cargar y conectar con estos orígenes -->
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://lzqdhdvkwiinocmrrwjn.supabase.co https://ve.dolarapi.com; object-src 'none'; base-uri 'self'; form-action 'self'" />
+  <meta name="referrer" content="no-referrer" />
   <link rel="icon" type="image/png" href="imagen/logo.png" />
 
   <!-- Google Fonts: Plus Jakarta Sans & Outfit -->
@@ -18,8 +22,10 @@
     href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
     rel="stylesheet">
 
-  <!-- Supabase JS Client SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Supabase JS Client SDK (versión fija + verificación de integridad) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"
+    integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK"
+    crossorigin="anonymous"></script>
 
   <style>
     :root {
@@ -1029,6 +1035,121 @@
       cursor: pointer;
     }
 
+    /* ==========================================================================
+       ACCESO (LOGIN)
+       ========================================================================== */
+    [hidden] { display: none !important; }
+
+    .btn-refresh.btn-logout {
+      background: #ffffff;
+      color: var(--logo-navy-850);
+      border: 1.5px solid var(--border-soft);
+      box-shadow: var(--shadow-xs);
+    }
+
+    .btn-refresh.btn-logout:hover {
+      background: var(--accent-red-50);
+      border-color: #fecaca;
+      color: var(--accent-red-700);
+    }
+
+    .login-gate {
+      flex: 1;
+      display: grid;
+      place-items: center;
+      padding: 3rem 1rem;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 380px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      padding: 2rem 1.6rem 1.6rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+    }
+
+    .login-icon {
+      width: 56px;
+      height: 56px;
+      display: grid;
+      place-items: center;
+      border-radius: 18px;
+      background: var(--logo-cyan-50);
+      font-size: 1.6rem;
+    }
+
+    .login-card h2 {
+      font-size: 1.35rem;
+      font-weight: 900;
+      color: var(--logo-navy-950);
+    }
+
+    .login-card p {
+      font-size: 0.86rem;
+      color: var(--text-muted);
+      margin-top: -0.4rem;
+    }
+
+    .login-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .login-field input {
+      height: 46px;
+      padding: 0 1rem;
+      background: var(--logo-cyan-50);
+      border: 1.5px solid transparent;
+      border-radius: var(--radius-sm);
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--logo-navy-950);
+      text-transform: none;
+      letter-spacing: normal;
+      outline: none;
+      transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .login-field input:focus {
+      background: #ffffff;
+      border-color: var(--logo-blue-cart);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .login-error {
+      min-height: 1.2em;
+      margin: 0 !important;
+      font-size: 0.82rem !important;
+      font-weight: 700;
+      color: var(--accent-red-700) !important;
+    }
+
+    .btn-login {
+      height: 48px;
+      background: var(--logo-navy-850);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-full);
+      font-size: 0.95rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-login:hover { background: var(--logo-navy-700); }
+    .btn-login:disabled { opacity: 0.6; cursor: wait; }
+
     /* Footer */
     .site-footer {
       background: var(--logo-navy-950);
@@ -1138,7 +1259,7 @@
         </div>
 
         <!-- Botón Recargar Datos -->
-        <button id="btnReload" class="btn-refresh" title="Recargar catálogo desde la base de datos">
+        <button id="btnReload" class="btn-refresh" title="Recargar catálogo desde la base de datos" hidden>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M21 12a9 9 0 1 1-2.64-6.36" />
@@ -1146,11 +1267,41 @@
           </svg>
           <span class="label">Actualizar</span>
         </button>
+
+        <!-- Cerrar sesión -->
+        <button id="btnLogout" class="btn-refresh btn-logout" title="Cerrar sesión" hidden>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <path d="m16 17 5-5-5-5" />
+            <path d="M21 12H9" />
+          </svg>
+          <span class="label">Salir</span>
+        </button>
       </div>
     </div>
   </header>
 
-  <div class="page-wrap">
+  <!-- ==========================================================================
+       ACCESO: solo administradores ven costos y márgenes
+       ========================================================================== -->
+  <div class="login-gate" id="loginGate" hidden>
+    <form class="login-card" id="loginForm" novalidate>
+      <div class="login-icon">🔒</div>
+      <h2>Acceso restringido</h2>
+      <p>Ingresa con tu cuenta de administrador para ver costos y márgenes.</p>
+      <label class="login-field">Correo
+        <input type="email" id="loginEmail" autocomplete="username" required>
+      </label>
+      <label class="login-field">Contraseña
+        <input type="password" id="loginPassword" autocomplete="current-password" required>
+      </label>
+      <p class="login-error" id="loginError" role="alert"></p>
+      <button type="submit" class="btn-login" id="btnLogin">Entrar</button>
+    </form>
+  </div>
+
+  <div class="page-wrap" id="pageWrap" hidden>
 
     <!-- ==========================================================================
          RESUMEN (KPIs)
@@ -1412,13 +1563,16 @@
       if (btnReload) btnReload.classList.add('spinning');
 
       try {
-        const { data, error } = await _supabase
-          .from('el_mana_market')
-          .select('id, nombre, precio_venta, precio_compra, categoria, created_at')
-          .order('categoria', { ascending: true })
-          .order('nombre', { ascending: true });
+        // Función protegida en Supabase: solo responde a administradores con sesión iniciada
+        const { data, error } = await _supabase.rpc('consulta_costos');
 
-        if (error) throw new Error('Error al conectar con Supabase: ' + error.message);
+        if (error) {
+          if (error.code === '42501' || /no autorizado|jwt|permission/i.test(error.message || '')) {
+            await cerrarSesion('Esta cuenta no tiene permiso para ver costos.');
+            return;
+          }
+          throw new Error('Error al conectar con Supabase: ' + error.message);
+        }
         if (!data || data.length === 0) throw new Error('No se encontraron productos en la base de datos.');
 
         const categoriasSet = new Set();
@@ -1914,10 +2068,87 @@
         obtenerTasaBCV();
       });
 
-      // Cargas iniciales
+      // Acceso
+      document.getElementById('loginForm').addEventListener('submit', iniciarSesion);
+      document.getElementById('btnLogout').addEventListener('click', () => cerrarSesion('Sesión cerrada.'));
+
+      // Cargas iniciales: la tasa es pública; los productos solo con sesión
       obtenerTasaBCV();
-      cargarProductos();
+      verificarSesion();
     });
+
+    // =========================================================================
+    // ACCESO (SUPABASE AUTH)
+    // =========================================================================
+    function mostrarAcceso(mensaje) {
+      document.getElementById('pageWrap').hidden = true;
+      document.getElementById('loginGate').hidden = false;
+      document.getElementById('btnLogout').hidden = true;
+      document.getElementById('btnReload').hidden = true;
+      document.getElementById('loginError').textContent = mensaje || '';
+      document.getElementById('loginEmail').focus();
+    }
+
+    function mostrarPanel() {
+      document.getElementById('loginGate').hidden = true;
+      document.getElementById('pageWrap').hidden = false;
+      document.getElementById('btnLogout').hidden = false;
+      document.getElementById('btnReload').hidden = false;
+      sincronizarAlturaHeader();
+      cargarProductos();
+    }
+
+    async function verificarSesion() {
+      try {
+        const { data } = await _supabase.auth.getSession();
+        if (data && data.session) mostrarPanel();
+        else mostrarAcceso('');
+      } catch (e) {
+        mostrarAcceso('');
+      }
+    }
+
+    async function iniciarSesion(e) {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const errorEl = document.getElementById('loginError');
+      const btn = document.getElementById('btnLogin');
+
+      if (!email || !password) {
+        errorEl.textContent = 'Escribe tu correo y tu contraseña.';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Entrando...';
+      errorEl.textContent = '';
+
+      const { error } = await _supabase.auth.signInWithPassword({ email, password });
+
+      btn.disabled = false;
+      btn.textContent = 'Entrar';
+      document.getElementById('loginPassword').value = '';
+
+      if (error) {
+        const msg = /invalid login/i.test(error.message) ? 'Correo o contraseña incorrectos.'
+          : /not confirmed/i.test(error.message) ? 'Primero confirma tu correo.'
+          : /rate|too many/i.test(error.message) ? 'Demasiados intentos. Espera unos minutos.'
+          : 'No se pudo iniciar sesión.';
+        errorEl.textContent = msg;
+        return;
+      }
+      mostrarPanel();
+    }
+
+    async function cerrarSesion(mensaje) {
+      try { await _supabase.auth.signOut(); } catch (e) { /* sin conexión: igual se limpia */ }
+      // No dejar datos de costos en pantalla ni en memoria
+      state.productos = [];
+      state.categorias = [];
+      document.getElementById('productsViewContainer').innerHTML = '';
+      mostrarAcceso(mensaje);
+    }
   </script>
 </body>
 

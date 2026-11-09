@@ -8,6 +8,10 @@
   <meta name="description"
     content="Catálogo de productos y precios actualizados en El Maná Market. Calidad, frescura y los mejores precios para tu hogar." />
   <meta name="theme-color" content="#081a30" />
+  <!-- Seguridad: solo se permite cargar y conectar con estos orígenes -->
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://lzqdhdvkwiinocmrrwjn.supabase.co https://ve.dolarapi.com; object-src 'none'; base-uri 'self'; form-action 'self'" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
   <link rel="icon" type="image/png" href="imagen/logo.png" />
 
   <!-- Google Fonts: Plus Jakarta Sans & Outfit -->
@@ -17,8 +21,10 @@
     href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
     rel="stylesheet">
 
-  <!-- Supabase JS Client SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Supabase JS Client SDK (versión fija + verificación de integridad) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"
+    integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK"
+    crossorigin="anonymous"></script>
 
   <style>
     :root {
@@ -1818,7 +1824,7 @@
     async function cargarProductosDesdeSupabase() {
       const { data, error } = await _supabase
         .from('el_mana_market')
-        .select('*');
+        .select('id, nombre, precio_venta, categoria'); // solo datos públicos: nunca el costo
 
       if (error) throw new Error('Error al conectar con Supabase: ' + error.message);
       if (!data || data.length === 0) throw new Error('La base de datos está vacía.');
