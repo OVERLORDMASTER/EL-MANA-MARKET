@@ -11,7 +11,7 @@
   <meta name="theme-color" content="#081a30" />
   <!-- Seguridad: solo se permite cargar y conectar con estos orígenes -->
   <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://lzqdhdvkwiinocmrrwjn.supabase.co https://ve.dolarapi.com https://login-worker.benjaminandresperaza.workers.dev; object-src 'none'; base-uri 'self'; form-action 'self'" />
+    content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://lzqdhdvkwiinocmrrwjn.supabase.co https://ve.dolarapi.com https://login-worker.benjaminandresperaza.workers.dev https://floral-snow-3cfa.benjaminandresperaza.workers.dev; object-src 'none'; base-uri 'self'; form-action 'self'" />
   <meta name="referrer" content="no-referrer" />
   <link rel="icon" type="image/png" href="imagen/logo.png" />
 
@@ -2073,9 +2073,29 @@
 
     // =========================================================================
     // INICIO DE SESIÓN CON EL WORKER DE CLOUDFLARE
-    // El worker guarda los usuarios y responde { success: true } si son válidos.
+    // Los usuarios están en el KV del worker (key = usuario, value = contraseña).
+    // Responde { success: true } si son válidos. Se prueban en orden: si uno
+    // dice "Usuario no encontrado", se pregunta al siguiente.
     // =========================================================================
-    const LOGIN_WORKER_URL = 'https://login-worker.benjaminandresperaza.workers.dev';
+    const LOGIN_WORKERS = [
+      'https://login-worker.benjaminandresperaza.workers.dev',
+      'https://floral-snow-3cfa.benjaminandresperaza.workers.dev'
+    ];
+
+    async function consultarWorker(url, usuario, contrasena) {
+      const resp = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ usuario, contrasena })
+      });
+      let data = {};
+      try { data = await resp.json(); } catch (err) { /* respuesta sin JSON */ }
+      return {
+        ok: resp.ok && data.success === true,
+        status: resp.status,
+        mensaje: data.error || data.mensaje || data.message || ''
+      };
+    }
     const CLAVE_SESION = 'mana_consulta_sesion';
     const DURACION_SESION_MS = 8 * 60 * 60 * 1000; // 8 horas
 
@@ -2138,26 +2158,33 @@
       errorEl.textContent = '';
 
       try {
-        const resp = await fetch(LOGIN_WORKER_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ usuario, contrasena })
-        });
-        let data = {};
-        try { data = await resp.json(); } catch (err) { /* respuesta sin JSON */ }
+        let resultado = null;
+        let errorRed = false;
 
-        if (resp.ok && data.success) {
+        for (const url of LOGIN_WORKERS) {
+          try {
+            resultado = await consultarWorker(url, usuario, contrasena);
+          } catch (err) {
+            errorRed = true; // este worker no respondió: probar el siguiente
+            continue;
+          }
+          // Solo se pasa al siguiente worker si este no conoce al usuario
+          if (resultado.ok || !/no encontrado/i.test(resultado.mensaje)) break;
+        }
+
+        if (resultado && resultado.ok) {
           document.getElementById('loginPassword').value = '';
           guardarSesion(usuario);
           mostrarPanel();
+        } else if (!resultado && errorRed) {
+          errorEl.textContent = 'No se pudo conectar con el servicio de acceso. Revisa tu conexión.';
         } else {
-          errorEl.textContent = resp.status === 429
+          // Mostrar lo que respondió el worker (ej. "Usuario no encontrado", "Contraseña incorrecta")
+          errorEl.textContent = resultado.status === 429
             ? 'Demasiados intentos. Espera unos minutos.'
-            : 'Usuario o contraseña incorrectos.';
+            : (resultado.mensaje || 'Usuario o contraseña incorrectos.');
           document.getElementById('loginPassword').select();
         }
-      } catch (err) {
-        errorEl.textContent = 'No se pudo conectar con el servicio de acceso. Revisa tu conexión.';
       } finally {
         btn.disabled = false;
         btn.textContent = 'Entrar';
