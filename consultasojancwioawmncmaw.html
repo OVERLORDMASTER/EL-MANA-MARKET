@@ -11,7 +11,7 @@
   <meta name="theme-color" content="#081a30" />
   <!-- Seguridad: solo se permite cargar y conectar con estos orígenes -->
   <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://lzqdhdvkwiinocmrrwjn.supabase.co https://ve.dolarapi.com https://login-worker.benjaminandresperaza.workers.dev https://floral-snow-3cfa.benjaminandresperaza.workers.dev; object-src 'none'; base-uri 'self'; form-action 'self'" />
+    content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://lzqdhdvkwiinocmrrwjn.supabase.co https://ve.dolarapi.com https://login-worker.benjaminandresperaza.workers.dev https://floral-snow-3cfa.benjaminandresperaza.workers.dev; object-src 'none'; base-uri 'self'; form-action 'self'" />
   <meta name="referrer" content="no-referrer" />
   <link rel="icon" type="image/png" href="imagen/logo.png" />
 
@@ -1498,12 +1498,40 @@
       if (!fecha) return '';
       const d = new Date(fecha);
       if (isNaN(d)) return '';
-      return d.toLocaleString('es-VE', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+      return d.toLocaleDateString('es-VE', { weekday: 'short', day: '2-digit', month: 'short', timeZone: 'America/Caracas' });
     }
 
     // =========================================================================
     // SERVICIO: TASA BCV OFICIAL
+    // 1º tasas/dolar.json: ÚLTIMA tasa publicada por el BCV, actualizada cada
+    //    hora por la GitHub Action (el viernes en la tarde ya trae la del lunes,
+    //    y se usa sábado y domingo).
+    // 2º ve.dolarapi.com como respaldo si el archivo no está disponible.
+    // Nunca se reemplaza una tasa por otra de fecha más vieja.
     // =========================================================================
+    const FUENTES_TASA = [
+      'tasas/dolar.json',
+      'https://ve.dolarapi.com/v1/dolares/oficial'
+    ];
+
+    async function pedirTasaEnVivo() {
+      for (const url of FUENTES_TASA) {
+        try {
+          const r = await fetch(url, { cache: 'no-store' });
+          if (!r.ok) continue;
+          const d = await r.json();
+          if (d && typeof d.promedio === 'number' && d.promedio > 0) return d;
+        } catch (e) { /* esta fuente no respondió: probar la siguiente */ }
+      }
+      throw new Error('Ninguna fuente de tasa respondió');
+    }
+
+    // true si la fecha nueva es igual o más reciente que la que ya se tiene
+    function esTasaVigente(fechaNueva, fechaActual) {
+      if (!fechaActual || !fechaNueva) return true;
+      return String(fechaNueva).slice(0, 10) >= String(fechaActual).slice(0, 10);
+    }
+
     async function obtenerTasaBCV() {
       // 1. Caché para respuesta instantánea
       const cached = leerStorage('mana_bcv_rate', null);
@@ -1515,11 +1543,9 @@
 
       // 2. Consulta en vivo
       try {
-        const response = await fetch('https://ve.dolarapi.com/v1/dolares/oficial');
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const data = await response.json();
+        const data = await pedirTasaEnVivo();
 
-        if (data && typeof data.promedio === 'number' && data.promedio > 0) {
+        if (esTasaVigente(data.fechaActualizacion, state.tasaFecha)) {
           state.tasaBcv = data.promedio;
           state.tasaFecha = data.fechaActualizacion || new Date().toISOString();
           state.tasaEsReferencial = false;
@@ -1549,7 +1575,7 @@
       if (fechaEl) {
         fechaEl.textContent = state.tasaEsReferencial
           ? 'Tasa referencial (sin conexión)'
-          : (state.tasaFecha ? 'Act. ' + formatearFechaTasa(state.tasaFecha) : '');
+          : (state.tasaFecha ? 'Fecha valor ' + formatearFechaTasa(state.tasaFecha) : '');
       }
 
       if (pill) pill.classList.toggle('stale', state.tasaEsReferencial);
