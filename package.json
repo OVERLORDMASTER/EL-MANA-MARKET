@@ -1,0 +1,16 @@
+{
+  "name": "mana-market",
+  "version": "1.0.0",
+  "description": "El Maná Market - Catálogo con integración de Tasa BCV oficial",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "actualizar-tasa": "node scripts/actualizar-tasa.js"
+  },
+  "keywords": [
+    "mana-market",
+    "bcv"
+  ],
+  "author": "El Maná Market",
+  "license": "ISC"
+}

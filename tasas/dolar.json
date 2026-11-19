@@ -4,16 +4,13 @@
   "nombre": "Dólar",
   "compra": null,
   "venta": null,
-  "promedio": 914.0218,
-  "fechaActualizacion": "2026-11-16T00:00:00-04:00",
-  "fechaValor": "2026-11-16",
-  "fechaValorTexto": "Lunes, 16 Noviembre 2026",
-  "consultado": "2026-11-15T21:04:05-04:00",
+  "promedio": 917.7751,
+  "rate": 917.7751,
+  "fechaActualizacion": "2026-11-19T00:00:00-04:00",
+  "fechaValor": "2026-11-19",
+  "fechaValorTexto": "Jueves, 19 Noviembre 2026",
+  "consultado": "2026-11-18T23:26:35-04:00",
   "tasas": {
-    "USD": 914.0218,
-    "EUR": 1010.56078251,
-    "CNY": 137.02448092,
-    "TRY": 18.14739022,
-    "RUB": 11.12760896
+    "USD": 917.7751
   }
 }

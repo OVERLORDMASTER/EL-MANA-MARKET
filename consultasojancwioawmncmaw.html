@@ -1502,14 +1502,14 @@
     }
 
     // =========================================================================
-    // SERVICIO: TASA BCV OFICIAL
-    // 1º tasas/dolar.json: ÚLTIMA tasa publicada por el BCV, actualizada cada
-    //    hora por la GitHub Action (el viernes en la tarde ya trae la del lunes,
-    //    y se usa sábado y domingo).
-    // 2º ve.dolarapi.com como respaldo si el archivo no está disponible.
-    // Nunca se reemplaza una tasa por otra de fecha más vieja.
+    // SERVICIO: TASA BCV OFICIAL (misma lógica que e-commerce)
+    // 1º /api/bcv: Servicio local / VPS si está activo
+    // 2º tasas/dolar.json: Archivo sincronizado con la última tasa publicada por BCV
+    // 3º ve.dolarapi.com como respaldo de emergencia
     // =========================================================================
     const FUENTES_TASA = [
+      '/api/bcv',
+      'api/bcv',
       'tasas/dolar.json',
       'https://ve.dolarapi.com/v1/dolares/oficial'
     ];
@@ -1520,7 +1520,17 @@
           const r = await fetch(url, { cache: 'no-store' });
           if (!r.ok) continue;
           const d = await r.json();
-          if (d && typeof d.promedio === 'number' && d.promedio > 0) return d;
+          const rate = (typeof d.rate === 'number' && d.rate > 0) ? d.rate : ((typeof d.promedio === 'number' && d.promedio > 0) ? d.promedio : 0);
+          if (rate > 0) {
+            return {
+              rate,
+              promedio: rate,
+              fecha: d.fechaValor || d.fechaActualizacion || d.fecha || new Date().toISOString().slice(0, 10),
+              fechaActualizacion: d.fechaActualizacion || d.fecha || (d.fechaValor ? `${d.fechaValor}T00:00:00-04:00` : new Date().toISOString()),
+              fechaValor: d.fechaValor || String(d.fechaActualizacion || '').slice(0, 10),
+              fechaValorTexto: d.fechaValorTexto || ''
+            };
+          }
         } catch (e) { /* esta fuente no respondió: probar la siguiente */ }
       }
       throw new Error('Ninguna fuente de tasa respondió');
@@ -1545,9 +1555,9 @@
       try {
         const data = await pedirTasaEnVivo();
 
-        if (esTasaVigente(data.fechaActualizacion, state.tasaFecha)) {
-          state.tasaBcv = data.promedio;
-          state.tasaFecha = data.fechaActualizacion || new Date().toISOString();
+        if (esTasaVigente(data.fechaValor || data.fechaActualizacion, state.tasaFecha)) {
+          state.tasaBcv = data.rate;
+          state.tasaFecha = data.fechaValor || data.fechaActualizacion || new Date().toISOString();
           state.tasaEsReferencial = false;
           escribirStorage('mana_bcv_rate', { rate: state.tasaBcv, fecha: state.tasaFecha, timestamp: Date.now() });
 
