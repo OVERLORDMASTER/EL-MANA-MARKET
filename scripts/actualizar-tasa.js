@@ -9,7 +9,7 @@ const tasaBCV = require('../lib/tasa-bcv');
 async function main() {
   try {
     await tasaBCV.actualizar();
-    const tasa = tasaBCV.ultimaPublicada();
+    const tasa = tasaBCV.tasaActiva() || tasaBCV.ultimaPublicada();
     if (tasa) {
       console.log(`[ok] Tasa actualizada: ${tasa.usd} Bs./$ (${tasa.fechaValor}) - ${tasa.texto || ''}`);
       process.exit(0);

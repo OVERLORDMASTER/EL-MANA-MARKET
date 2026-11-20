@@ -51,10 +51,10 @@ const server = http.createServer(async (req, res) => {
 
   // API Tasa BCV (misma respuesta que e-commerce)
   if (ruta === '/api/bcv') {
-    let tasa = tasaBCV.ultimaPublicada();
+    let tasa = tasaBCV.tasaActiva();
     if (!tasa) {
       await tasaBCV.actualizar();
-      tasa = tasaBCV.ultimaPublicada();
+      tasa = tasaBCV.tasaActiva();
     }
     if (!tasa) {
       res.writeHead(503, { 'Content-Type': 'application/json; charset=utf-8' });

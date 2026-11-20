@@ -102,27 +102,9 @@ def main():
         print(f"[aviso] El BCV muestra {fecha}, pero ya hay guardada {anterior['fechaValor']}; no se retrocede.")
         return 0
 
-    # Actualizar tasas/dolar.json
-    salida = {
-        "moneda": "USD",
-        "fuente": "oficial" if fuente == "bcv" else "respaldo",
-        "nombre": "Dólar",
-        "compra": None,
-        "venta": None,
-        "promedio": usd,
-        "rate": usd,
-        "fechaActualizacion": f"{fecha}T00:00:00-04:00",
-        "fechaValor": fecha,
-        "fechaValorTexto": datos.get("fecha_valor_texto"),
-        "consultado": datetime.now(VENEZUELA).isoformat(timespec="seconds"),
-        "tasas": datos.get("tasas", {}),
-    }
-    SALIDA.parent.mkdir(parents=True, exist_ok=True)
-    SALIDA.write_text(json.dumps(salida, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-
-    # Actualizar también historial tasa-bcv.json
+    # Actualizar historial tasa-bcv.json primero
+    historial_data = {"historial": {}, "ultimaConsulta": datetime.now(VENEZUELA).isoformat(timespec="seconds"), "ultimoExito": None, "ultimoError": None}
     try:
-        historial_data = {"historial": {}, "ultimaConsulta": datetime.now(VENEZUELA).isoformat(timespec="seconds"), "ultimoExito": None, "ultimoError": None}
         if HISTORIAL.exists():
             try:
                 historial_data = json.loads(HISTORIAL.read_text(encoding="utf-8"))
@@ -140,6 +122,43 @@ def main():
         HISTORIAL.write_text(json.dumps(historial_data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     except Exception as err:
         print(f"[aviso] No se pudo escribir tasa-bcv.json: {err}")
+
+    # Determinar la tasa activa según día de la semana:
+    # Sábado y Domingo: tasa del lunes (última publicada)
+    # Lunes a Viernes: tasa vigente hoy
+    ahora_ve = datetime.now(VENEZUELA)
+    dia_semana = ahora_ve.weekday()  # 0 = Lunes, ..., 4 = Viernes, 5 = Sábado, 6 = Domingo
+    hoy_str = ahora_ve.strftime("%Y-%m-%d")
+
+    tasa_activa_fecha = fecha
+    tasa_activa_usd = usd
+    tasa_activa_texto = datos.get("fecha_valor_texto")
+
+    if dia_semana not in (5, 6) and fecha > hoy_str and historial_data.get("historial"):
+        fechas_validas = [f for f in sorted(historial_data["historial"].keys()) if f <= hoy_str]
+        if fechas_validas:
+            f_vigente = fechas_validas[-1]
+            tasa_activa_fecha = f_vigente
+            tasa_activa_usd = historial_data["historial"][f_vigente]["usd"]
+            tasa_activa_texto = historial_data["historial"][f_vigente].get("texto") or f_vigente
+
+    # Actualizar tasas/dolar.json con la tasa activa
+    salida = {
+        "moneda": "USD",
+        "fuente": "oficial" if fuente == "bcv" else "respaldo",
+        "nombre": "Dólar",
+        "compra": None,
+        "venta": None,
+        "promedio": tasa_activa_usd,
+        "rate": tasa_activa_usd,
+        "fechaActualizacion": f"{tasa_activa_fecha}T00:00:00-04:00",
+        "fechaValor": tasa_activa_fecha,
+        "fechaValorTexto": tasa_activa_texto,
+        "consultado": datetime.now(VENEZUELA).isoformat(timespec="seconds"),
+        "tasas": datos.get("tasas", {}),
+    }
+    SALIDA.parent.mkdir(parents=True, exist_ok=True)
+    SALIDA.write_text(json.dumps(salida, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     print(f"Actualizada con éxito: {fecha} -> {usd} Bs/$ ({datos.get('fecha_valor_texto')})")
     return 0

@@ -1772,24 +1772,28 @@
 
     // =========================================================================
     // SERVICIO: TASA OFICIAL BCV (misma lógica que e-commerce)
-    // 1º /api/bcv: Servicio local / VPS si está activo
-    // 2º tasas/dolar.json: Archivo sincronizado con la última tasa publicada por BCV
-    // 3º ve.dolarapi.com como respaldo de emergencia
+    // 1º /api/bcv: Servicio local / VPS oficial (Node.js con certificado Sectigo)
+    // 2º https://ve.dolarapi.com/v1/dolares/oficial: API oficial en vivo de respaldo
+    // 3º tasas/dolar.json: Archivo local sincronizado por el servidor
     // =========================================================================
     const FUENTES_TASA = [
       '/api/bcv',
       'api/bcv',
-      'tasas/dolar.json',
-      'https://ve.dolarapi.com/v1/dolares/oficial'
+      'https://ve.dolarapi.com/v1/dolares/oficial',
+      'tasas/dolar.json'
     ];
 
     async function pedirTasaEnVivo() {
       for (const url of FUENTES_TASA) {
         try {
-          const r = await fetch(url, { cache: 'no-store' });
+          const sep = url.includes('?') ? '&' : '?';
+          const destino = url.startsWith('http') ? url : `${url}${sep}_=${Date.now()}`;
+          const r = await fetch(destino, { cache: 'no-store' });
           if (!r.ok) continue;
           const d = await r.json();
-          const rate = (typeof d.rate === 'number' && d.rate > 0) ? d.rate : ((typeof d.promedio === 'number' && d.promedio > 0) ? d.promedio : 0);
+          const rate = (typeof d.rate === 'number' && d.rate > 0)
+            ? d.rate
+            : ((typeof d.promedio === 'number' && d.promedio > 0) ? d.promedio : 0);
           if (rate > 0) {
             return {
               rate,
@@ -1805,14 +1809,8 @@
       throw new Error('Ninguna fuente de tasa respondió');
     }
 
-    // true si la fecha nueva es igual o más reciente que la que ya se tiene
-    function esTasaVigente(fechaNueva, fechaActual) {
-      if (!fechaActual || !fechaNueva) return true;
-      return String(fechaNueva).slice(0, 10) >= String(fechaActual).slice(0, 10);
-    }
-
     async function obtenerTasaBCV() {
-      // 1. Caché para mostrar de inmediato
+      // 1. Mostrar de inmediato la última tasa conocida en caché
       const cached = leerStorage('mana_bcv_rate', null);
       if (cached && typeof cached.rate === 'number' && cached.rate > 0) {
         state.tasaBcv = cached.rate;
@@ -1820,11 +1818,10 @@
         actualizarUIBCV();
       }
 
-      // 2. Consulta en vivo
+      // 2. Consulta en vivo (misma lógica que e-commerce: actualiza siempre con la tasa oficial fresca)
       try {
         const data = await pedirTasaEnVivo();
-
-        if (esTasaVigente(data.fechaValor || data.fechaActualizacion, state.tasaFecha)) {
+        if (data && typeof data.rate === 'number' && data.rate > 0) {
           state.tasaBcv = data.rate;
           state.tasaFecha = data.fechaValor || data.fechaActualizacion || new Date().toISOString();
           escribirStorage('mana_bcv_rate', { rate: state.tasaBcv, fecha: state.tasaFecha, timestamp: Date.now() });
@@ -1837,10 +1834,6 @@
         }
       } catch (err) {
         console.warn('Aviso: No se pudo consultar la API BCV en vivo:', err);
-        if (!state.tasaBcv) {
-          state.tasaBcv = 798.33; // Tasa referencial de contingencia
-          state.tasaFecha = 'Referencial';
-        }
         actualizarUIBCV();
       }
     }
@@ -2352,6 +2345,7 @@
 
       // Tasa BCV en paralelo
       const promesaBCV = obtenerTasaBCV();
+      setInterval(obtenerTasaBCV, 15 * 60 * 1000); // Re-consultar tasa cada 15 min en segundo plano
 
       try {
         await cargarProductosDesdeSupabase();
