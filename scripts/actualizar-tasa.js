@@ -9,12 +9,12 @@ const tasaBCV = require('../lib/tasa-bcv');
 async function main() {
   try {
     await tasaBCV.actualizar();
-    const tasa = tasaBCV.tasaActiva() || tasaBCV.ultimaPublicada();
-    if (tasa) {
+    const { tasaActiva: tasa, ultimoError } = tasaBCV.salud();
+    if (tasa && !ultimoError) {
       console.log(`[ok] Tasa actualizada: ${tasa.usd} Bs./$ (${tasa.fechaValor}) - ${tasa.texto || ''}`);
       process.exit(0);
     } else {
-      console.warn('[aviso] No se obtuvo tasa válida');
+      console.warn('[aviso] No se obtuvo una lectura directa del BCV');
       process.exit(1);
     }
   } catch (err) {

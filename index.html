@@ -10,7 +10,7 @@
   <meta name="theme-color" content="#081a30" />
   <!-- Seguridad: solo se permite cargar y conectar con estos orígenes -->
   <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://lzqdhdvkwiinocmrrwjn.supabase.co https://ve.dolarapi.com; object-src 'none'; base-uri 'self'; form-action 'self'" />
+    content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://lzqdhdvkwiinocmrrwjn.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'" />
   <meta name="referrer" content="strict-origin-when-cross-origin" />
   <link rel="icon" type="image/png" href="imagen/logo.png" />
 
@@ -1772,47 +1772,28 @@
 
     // =========================================================================
     // SERVICIO: TASA OFICIAL BCV (misma lógica que e-commerce)
-    // 1º /api/bcv: Servicio local / VPS oficial (Node.js con certificado Sectigo)
-    // 2º https://ve.dolarapi.com/v1/dolares/oficial: API oficial en vivo de respaldo
-    // 3º tasas/dolar.json: Archivo local sincronizado por el servidor
+    // El servidor Node ofrece /api/bcv. En Pages se usa el JSON del mismo sitio.
     // =========================================================================
-    const FUENTES_TASA = [
-      '/api/bcv',
-      'api/bcv',
-      'https://ve.dolarapi.com/v1/dolares/oficial',
-      'tasas/dolar.json'
-    ];
-
     async function pedirTasaEnVivo() {
-      for (const url of FUENTES_TASA) {
+      for (const url of ['api/bcv', 'tasas/dolar.json']) {
         try {
-          const sep = url.includes('?') ? '&' : '?';
-          const destino = url.startsWith('http') ? url : `${url}${sep}_=${Date.now()}`;
-          const r = await fetch(destino, { cache: 'no-store' });
+          const r = await fetch(url, { cache: 'no-store' });
           if (!r.ok) continue;
           const d = await r.json();
-          const rate = (typeof d.rate === 'number' && d.rate > 0)
-            ? d.rate
-            : ((typeof d.promedio === 'number' && d.promedio > 0) ? d.promedio : 0);
-          if (rate > 0) {
-            return {
-              rate,
-              promedio: rate,
-              fecha: d.fechaValor || d.fechaActualizacion || d.fecha || new Date().toISOString().slice(0, 10),
-              fechaActualizacion: d.fechaActualizacion || d.fecha || (d.fechaValor ? `${d.fechaValor}T00:00:00-04:00` : new Date().toISOString()),
-              fechaValor: d.fechaValor || String(d.fechaActualizacion || '').slice(0, 10),
-              fechaValorTexto: d.fechaValorTexto || ''
-            };
+          if (['BCV', 'oficial'].includes(d.fuente) &&
+              Number.isFinite(d.rate) && d.rate > 0 &&
+              /^\d{4}-\d{2}-\d{2}$/.test(d.fechaValor)) {
+            return { rate: d.rate, fechaValor: d.fechaValor };
           }
-        } catch (e) { /* esta fuente no respondió: probar la siguiente */ }
+        } catch { /* probar la siguiente fuente */ }
       }
-      throw new Error('Ninguna fuente de tasa respondió');
+      throw new Error('No se pudo leer la tasa oficial del BCV');
     }
 
     async function obtenerTasaBCV() {
       // 1. Mostrar de inmediato la última tasa conocida en caché
       const cached = leerStorage('mana_bcv_rate', null);
-      if (cached && typeof cached.rate === 'number' && cached.rate > 0) {
+      if (cached?.fuente === 'BCV' && Number.isFinite(cached.rate) && cached.rate > 0) {
         state.tasaBcv = cached.rate;
         state.tasaFecha = cached.fecha || '';
         actualizarUIBCV();
@@ -1823,8 +1804,8 @@
         const data = await pedirTasaEnVivo();
         if (data && typeof data.rate === 'number' && data.rate > 0) {
           state.tasaBcv = data.rate;
-          state.tasaFecha = data.fechaValor || data.fechaActualizacion || new Date().toISOString();
-          escribirStorage('mana_bcv_rate', { rate: state.tasaBcv, fecha: state.tasaFecha, timestamp: Date.now() });
+          state.tasaFecha = data.fechaValor;
+          escribirStorage('mana_bcv_rate', { rate: state.tasaBcv, fecha: state.tasaFecha, fuente: 'BCV', timestamp: Date.now() });
 
           actualizarUIBCV();
           if (state.productos.length > 0) {

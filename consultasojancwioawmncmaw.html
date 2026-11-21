@@ -11,7 +11,7 @@
   <meta name="theme-color" content="#081a30" />
   <!-- Seguridad: solo se permite cargar y conectar con estos orígenes -->
   <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://lzqdhdvkwiinocmrrwjn.supabase.co https://ve.dolarapi.com https://login-worker.benjaminandresperaza.workers.dev https://floral-snow-3cfa.benjaminandresperaza.workers.dev; object-src 'none'; base-uri 'self'; form-action 'self'" />
+    content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://lzqdhdvkwiinocmrrwjn.supabase.co https://login-worker.benjaminandresperaza.workers.dev https://floral-snow-3cfa.benjaminandresperaza.workers.dev; object-src 'none'; base-uri 'self'; form-action 'self'" />
   <meta name="referrer" content="no-referrer" />
   <link rel="icon" type="image/png" href="imagen/logo.png" />
 
@@ -260,11 +260,6 @@
       border: 2px solid #fff;
       border-radius: 50%;
       animation: bcvPulse 1.8s infinite cubic-bezier(0.66, 0, 0, 1);
-    }
-
-    .bcv-pill.stale .bcv-pulse-dot {
-      background: #f59e0b;
-      animation: none;
     }
 
     @keyframes bcvPulse {
@@ -1246,7 +1241,7 @@
 
       <div class="header-actions">
         <!-- Widget Tasa Oficial BCV -->
-        <div class="bcv-pill" id="bcvPill" title="Tasa oficial del Banco Central de Venezuela">
+        <div class="bcv-pill" title="Tasa oficial del Banco Central de Venezuela">
           <div class="bcv-flag-wrap">
             <span>🇻🇪</span>
             <span class="bcv-pulse-dot"></span>
@@ -1503,49 +1498,28 @@
 
     // =========================================================================
     // SERVICIO: TASA BCV OFICIAL (misma lógica que e-commerce)
-    // 1º /api/bcv: Servicio local / VPS si está activo
-    // 2º tasas/dolar.json: Archivo sincronizado con la última tasa publicada por BCV
-    // 3º ve.dolarapi.com como respaldo de emergencia
+    // El servidor Node ofrece /api/bcv. En Pages se usa el JSON del mismo sitio.
     // =========================================================================
-    const FUENTES_TASA = [
-      '/api/bcv',
-      'api/bcv',
-      'tasas/dolar.json',
-      'https://ve.dolarapi.com/v1/dolares/oficial'
-    ];
-
     async function pedirTasaEnVivo() {
-      for (const url of FUENTES_TASA) {
+      for (const url of ['api/bcv', 'tasas/dolar.json']) {
         try {
           const r = await fetch(url, { cache: 'no-store' });
           if (!r.ok) continue;
           const d = await r.json();
-          const rate = (typeof d.rate === 'number' && d.rate > 0) ? d.rate : ((typeof d.promedio === 'number' && d.promedio > 0) ? d.promedio : 0);
-          if (rate > 0) {
-            return {
-              rate,
-              promedio: rate,
-              fecha: d.fechaValor || d.fechaActualizacion || d.fecha || new Date().toISOString().slice(0, 10),
-              fechaActualizacion: d.fechaActualizacion || d.fecha || (d.fechaValor ? `${d.fechaValor}T00:00:00-04:00` : new Date().toISOString()),
-              fechaValor: d.fechaValor || String(d.fechaActualizacion || '').slice(0, 10),
-              fechaValorTexto: d.fechaValorTexto || ''
-            };
+          if (['BCV', 'oficial'].includes(d.fuente) &&
+              Number.isFinite(d.rate) && d.rate > 0 &&
+              /^\d{4}-\d{2}-\d{2}$/.test(d.fechaValor)) {
+            return { rate: d.rate, fechaValor: d.fechaValor };
           }
-        } catch (e) { /* esta fuente no respondió: probar la siguiente */ }
+        } catch { /* probar la siguiente fuente */ }
       }
-      throw new Error('Ninguna fuente de tasa respondió');
-    }
-
-    // true si la fecha nueva es igual o más reciente que la que ya se tiene
-    function esTasaVigente(fechaNueva, fechaActual) {
-      if (!fechaActual || !fechaNueva) return true;
-      return String(fechaNueva).slice(0, 10) >= String(fechaActual).slice(0, 10);
+      throw new Error('No se pudo leer la tasa oficial del BCV');
     }
 
     async function obtenerTasaBCV() {
       // 1. Caché para respuesta instantánea
       const cached = leerStorage('mana_bcv_rate', null);
-      if (cached && typeof cached.rate === 'number' && cached.rate > 0) {
+      if (cached?.fuente === 'BCV' && Number.isFinite(cached.rate) && cached.rate > 0) {
         state.tasaBcv = cached.rate;
         state.tasaFecha = cached.fecha || '';
         actualizarUIBCV();
@@ -1555,21 +1529,13 @@
       try {
         const data = await pedirTasaEnVivo();
 
-        if (esTasaVigente(data.fechaValor || data.fechaActualizacion, state.tasaFecha)) {
-          state.tasaBcv = data.rate;
-          state.tasaFecha = data.fechaValor || data.fechaActualizacion || new Date().toISOString();
-          state.tasaEsReferencial = false;
-          escribirStorage('mana_bcv_rate', { rate: state.tasaBcv, fecha: state.tasaFecha, timestamp: Date.now() });
-
-          actualizarUIBCV();
-          if (state.productos.length > 0) renderizarVista();
-        }
+        state.tasaBcv = data.rate;
+        state.tasaFecha = data.fechaValor;
+        escribirStorage('mana_bcv_rate', { rate: state.tasaBcv, fecha: state.tasaFecha, fuente: 'BCV', timestamp: Date.now() });
+        actualizarUIBCV();
+        if (state.productos.length > 0) renderizarVista();
       } catch (err) {
         console.warn('Aviso: Falló consulta a API BCV en vivo:', err);
-        if (!state.tasaBcv) {
-          state.tasaBcv = 798.33; // Tasa referencial de contingencia
-          state.tasaEsReferencial = true;
-        }
         actualizarUIBCV();
         if (state.productos.length > 0) renderizarVista();
       }
@@ -1578,17 +1544,12 @@
     function actualizarUIBCV() {
       const el = document.getElementById('bcvRateDisplay');
       const fechaEl = document.getElementById('bcvDateDisplay');
-      const pill = document.getElementById('bcvPill');
 
       if (el) el.textContent = state.tasaBcv > 0 ? `${formatearBs(state.tasaBcv)} / $` : 'Calculando...';
 
       if (fechaEl) {
-        fechaEl.textContent = state.tasaEsReferencial
-          ? 'Tasa referencial (sin conexión)'
-          : (state.tasaFecha ? 'Fecha valor ' + formatearFechaTasa(state.tasaFecha) : '');
+        fechaEl.textContent = state.tasaFecha ? 'Fecha valor ' + formatearFechaTasa(state.tasaFecha) : '';
       }
-
-      if (pill) pill.classList.toggle('stale', state.tasaEsReferencial);
     }
 
     // =========================================================================
@@ -2104,6 +2065,7 @@
 
       // Cargas iniciales: la tasa es pública; los productos solo con sesión
       obtenerTasaBCV();
+      setInterval(obtenerTasaBCV, 15 * 60 * 1000);
       verificarSesion();
     });
 

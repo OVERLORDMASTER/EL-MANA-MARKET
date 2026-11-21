@@ -4,13 +4,13 @@
   "nombre": "Dólar",
   "compra": null,
   "venta": null,
-  "promedio": 918.7662,
-  "rate": 918.7662,
-  "fechaActualizacion": "2026-11-20T00:00:00-04:00",
-  "fechaValor": "2026-11-20",
-  "fechaValorTexto": "Viernes, 20 Noviembre 2026",
-  "consultado": "2026-11-20T16:03:53-04:00",
+  "promedio": 919.8227,
+  "rate": 919.8227,
+  "fechaActualizacion": "2026-11-24T00:00:00-04:00",
+  "fechaValor": "2026-11-24",
+  "fechaValorTexto": "Martes, 24 Noviembre 2026",
+  "consultado": "2026-11-20T23:13:01-04:00",
   "tasas": {
-    "USD": 918.7662
+    "USD": 919.8227
   }
 }

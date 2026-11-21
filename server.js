@@ -4,7 +4,7 @@
  * 
  * Inicia la sincronización automática horaria de la tasa BCV (misma lógica que e-commerce).
  * Expone:
- *   - GET /api/bcv          -> Tasa oficial BCV (última publicada)
+ *   - GET /api/bcv          -> Tasa oficial BCV activa
  *   - GET /api/bcv-estado   -> Diagnóstico de lectura del BCV
  *   - Archivos estáticos    -> index.html, consultasojancwioawmncmaw.html, imagen/, tasas/, etc.
  */
@@ -73,7 +73,7 @@ const server = http.createServer(async (req, res) => {
       fechaActualizacion: `${tasa.fechaValor}T00:00:00-04:00`,
       fechaValor: tasa.fechaValor,
       fechaValorTexto: tasa.texto || '',
-      fuente: tasa.fuente === 'bcv' ? 'BCV' : 'respaldo'
+      fuente: 'BCV'
     }));
   }
 
